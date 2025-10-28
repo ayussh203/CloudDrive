@@ -25,7 +25,8 @@ public class SecurityConfig {
             .csrf(csrf -> csrf.disable())
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers("/ping", "/actuator/**", "/api/auth/**", "/h2-console/**").permitAll()
-                .requestMatchers("/api/secure/**").authenticated()
+                 .requestMatchers("/api/secure/**", "/api/files/**", "/api/dev/**").authenticated()
+               // .requestMatchers("/api/secure/**").authenticated()
                 .anyRequest().permitAll()
             )
             .headers(h -> h.frameOptions(f -> f.disable())) // H2 console

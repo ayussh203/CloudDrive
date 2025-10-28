@@ -29,3 +29,8 @@ app:
   jwt:
     secret: "dev-change-me-please-32+chars-long"
     ttlMinutes: 60
+  s3:
+    bucket: "clouddrive-dev-ayush"
+    region: "ap-south-1"  
+
+  
