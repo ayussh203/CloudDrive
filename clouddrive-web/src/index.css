@@ -1,0 +1,17 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root { color-scheme: light dark; }
+html, body, #root { height: 100%; }
+body {
+  @apply bg-gradient-to-br from-slate-50 via-white to-slate-100 text-slate-900;
+}
+.dark body {
+  @apply from-slate-900 via-slate-950 to-black text-slate-100;
+}
+
+/* glass utility */
+.glass {
+  @apply bg-white/60 dark:bg-white/10 backdrop-blur-md border border-white/20 shadow-soft;
+}

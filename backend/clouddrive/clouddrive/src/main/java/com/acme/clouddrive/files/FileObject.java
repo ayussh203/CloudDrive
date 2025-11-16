@@ -22,6 +22,9 @@ public class FileObject {
     @Column(nullable = false, length = 120)
     private String mimeType;
 
+     @Column(name = "folder_id")
+    private Long folderId;   
+
     @Column(nullable = false)
     private long sizeBytes;
 
@@ -55,4 +58,6 @@ public class FileObject {
 
     public Instant getCreatedAt() { return createdAt; }
     public void setCreatedAt(Instant createdAt) { this.createdAt = createdAt; }
+      public Long getFolderId() { return folderId; }
+    public void setFolderId(Long folderId) { this.folderId = folderId; } 
 }

@@ -9,4 +9,5 @@ import java.util.Optional;
 public interface FileObjectRepository extends JpaRepository<FileObject, Long> {
     List<FileObject> findAllByOwnerIdOrderByCreatedAtDesc(Long ownerId, Pageable pageable);
     Optional<FileObject> findByIdAndOwnerId(Long id, Long ownerId);
+    boolean existsByOwnerIdAndFolderId(Long ownerId, Long folderId);
 }

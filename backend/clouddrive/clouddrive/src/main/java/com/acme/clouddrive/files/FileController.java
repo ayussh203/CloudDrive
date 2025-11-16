@@ -1,23 +1,32 @@
 package com.acme.clouddrive.files;
 
+import com.acme.clouddrive.files.FileDtos.CreateRequest;
+import com.acme.clouddrive.files.FileDtos.FileResponse;
+import com.acme.clouddrive.files.FileDtos.UpdateRequest;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+import com.acme.clouddrive.folders.FolderService;  
 
+import java.io.IOException;
 import java.util.List;
-
-import static com.acme.clouddrive.files.FileDtos.*;
 
 @RestController
 @RequestMapping("/api/files")
 public class FileController {
 
     private final FileService service;
+      private final FolderService folderService; 
 
-    public FileController(FileService service) {
+    public FileController(FileService service,       // <-- add ctor arg
+                          FolderService folderService) {
         this.service = service;
+        this.folderService = folderService;         // <-- add
     }
+    // ---- JSON metadata endpoints you already had ----
 
     @PostMapping
     public FileResponse create(Authentication auth, @Validated @RequestBody CreateRequest req) {
@@ -48,4 +57,27 @@ public class FileController {
         service.delete(auth.getName(), id);
         return ResponseEntity.noContent().build();
     }
+
+    // ---- NEW: multipart upload -> delegates to service ----
+    // POST /api/files/upload  (multipart/form-data)
+    @PostMapping(
+            path = "/upload",
+            consumes = MediaType.MULTIPART_FORM_DATA_VALUE,
+            produces = MediaType.APPLICATION_JSON_VALUE
+    )
+    public FileResponse upload(Authentication auth,
+                               @RequestPart("file") MultipartFile file,
+                               @RequestParam(value = "folder", required = false, defaultValue = "uploads") String folder)
+            throws IOException {
+       
+       
+                return new FileResponse(service.upload(auth.getName(), file, folder));
+    }
+
+    @PatchMapping("/{id}/move")
+public ResponseEntity<?> moveFile(Authentication auth, @PathVariable Long id,
+                                  @RequestParam(required=false) Long targetFolderId) {
+    folderService.moveFile(auth.getName(), id, targetFolderId);
+    return ResponseEntity.noContent().build();
+}
 }

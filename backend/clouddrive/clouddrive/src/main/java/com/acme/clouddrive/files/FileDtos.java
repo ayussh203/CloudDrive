@@ -12,6 +12,8 @@ public class FileDtos {
         @NotBlank public String mimeType;
         @Min(0)  public long sizeBytes;
         public String checksumSha256; // optional
+        public Long folderId; // optional
+
     }
 
     public static class UpdateRequest {

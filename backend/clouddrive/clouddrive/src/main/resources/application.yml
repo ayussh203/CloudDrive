@@ -1,14 +1,13 @@
 server:
-  port: 8080
+  port: ${PORT:5000}
 
 spring:
   application:
     name: clouddrive
   datasource:
-    url: jdbc:h2:mem:clouddrive;DB_CLOSE_DELAY=-1;MODE=PostgreSQL
-    driverClassName: org.h2.Driver
-    username: sa
-    password: root
+    url: jdbc:postgresql://clouddrive-db-public.czio2aggmdzt.ap-south-1.rds.amazonaws.com:5432/clouddrive
+    username: cloudadmin
+    password: CloudDriveP#ss123!
   jpa:
     hibernate:
       ddl-auto: update
