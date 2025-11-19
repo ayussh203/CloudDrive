@@ -5,9 +5,9 @@ const api = axios.create({
   baseURL: import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000',
 });
 
+// Attach JWT if present
 api.interceptors.request.use((config) => {
   const t = localStorage.getItem('jwt');
-  console.log('Attaching token to request:', t);
   if (t) config.headers.Authorization = `Bearer ${t}`;
   return config;
 });

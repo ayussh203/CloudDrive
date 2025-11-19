@@ -2,16 +2,35 @@
 @tailwind components;
 @tailwind utilities;
 
-:root { color-scheme: light dark; }
 html, body, #root { height: 100%; }
 body {
-  @apply bg-gradient-to-br from-slate-50 via-white to-slate-100 text-slate-900;
+  @apply bg-gradient-to-b from-brand-50 to-white text-slate-800;
+  font-feature-settings: "ss01","ss02","cv01";
 }
-.dark body {
-  @apply from-slate-900 via-slate-950 to-black text-slate-100;
+/* brand */
+:root {
+  --brand-500: #7c3aed; /* violet-600-ish */
+  --brand-700: #5b21b6; /* violet-800-ish */
+}
+.bg-brand-grad { background-image: linear-gradient(135deg, var(--brand-500), var(--brand-700)); }
+.text-brand   { color: var(--brand-500); }
+
+/* soft floating reveal */
+@keyframes floatUp { from { transform: translateY(12px); opacity: .0; } to { transform: translateY(0); opacity: 1; } }
+.reveal { animation: floatUp .7s ease-out both; }
+
+/* slow blob */
+@keyframes blob {
+  0%,100% { border-radius: 38% 62% 60% 40% / 35% 45% 55% 65%; transform: translate(0,0) rotate(0deg); }
+  33%     { border-radius: 45% 55% 35% 65% / 60% 30% 70% 40%; transform: translate(6px,-8px) rotate(4deg); }
+  66%     { border-radius: 55% 45% 62% 38% / 40% 65% 35% 60%; transform: translate(-8px,6px) rotate(-3deg); }
+}
+.blob {
+  animation: blob 16s ease-in-out infinite;
+  filter: blur(32px);
+  opacity: .35;
 }
 
-/* glass utility */
-.glass {
-  @apply bg-white/60 dark:bg-white/10 backdrop-blur-md border border-white/20 shadow-soft;
-}
+/* nice section dividers */
+.section { @apply relative py-20 md:py-24; }
+.section .container { @apply max-w-6xl mx-auto px-4 md:px-6; }
