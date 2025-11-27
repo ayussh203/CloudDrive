@@ -10,6 +10,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import com.acme.clouddrive.folders.FolderService;  
+import com.acme.clouddrive.files.FileDtos.FileVersionResponse;
 
 import java.io.IOException;
 import java.util.List;
@@ -58,6 +59,8 @@ public class FileController {
         return ResponseEntity.noContent().build();
     }
 
+
+
     // ---- NEW: multipart upload -> delegates to service ----
     // POST /api/files/upload  (multipart/form-data)
     @PostMapping(
@@ -74,6 +77,41 @@ public class FileController {
                 return new FileResponse(service.upload(auth.getName(), file, folder));
     }
 
+
+    @PostMapping(
+            path = "/{id}/versions",
+            consumes = MediaType.MULTIPART_FORM_DATA_VALUE,
+            produces = MediaType.APPLICATION_JSON_VALUE
+    )
+    public FileResponse uploadNewVersion(
+            Authentication auth,
+            @PathVariable Long id,
+            @RequestPart("file") MultipartFile file
+    ) throws IOException {
+        return new FileResponse(service.uploadNewVersion(auth.getName(), id, file));
+    }
+
+
+     @GetMapping("/{id}/versions")
+    public List<FileVersionResponse> listVersions(
+            Authentication auth,
+            @PathVariable Long id
+    ) {
+        return service.listVersions(auth.getName(), id).stream()
+                .map(FileVersionResponse::new)
+                .toList();
+    }
+
+        @PostMapping("/{id}/versions/{version}/restore")
+    public FileResponse restoreVersion(
+            Authentication auth,
+            @PathVariable Long id,
+            @PathVariable int version
+    ) {
+        return new FileResponse(service.restoreVersion(auth.getName(), id, version));
+    }
+
+    
     @PatchMapping("/{id}/move")
 public ResponseEntity<?> moveFile(Authentication auth, @PathVariable Long id,
                                   @RequestParam(required=false) Long targetFolderId) {

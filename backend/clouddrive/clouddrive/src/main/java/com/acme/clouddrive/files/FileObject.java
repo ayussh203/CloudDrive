@@ -34,6 +34,10 @@ public class FileObject {
     @Column(nullable = false)
     private Instant createdAt = Instant.now();
 
+        @Column
+    private Integer version = 1;
+
+
     // getters/setters
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
@@ -60,4 +64,13 @@ public class FileObject {
     public void setCreatedAt(Instant createdAt) { this.createdAt = createdAt; }
       public Long getFolderId() { return folderId; }
     public void setFolderId(Long folderId) { this.folderId = folderId; } 
+
+        public Integer getVersion() {
+        return version;
+    }
+
+    public void setVersion(Integer version) {
+        this.version = version;
+    }
+
 }

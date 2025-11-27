@@ -1,5 +1,7 @@
 package com.acme.clouddrive.files;
 
+import com.acme.clouddrive.files.FileDtos.CreateRequest;
+import com.acme.clouddrive.files.FileDtos.UpdateRequest;
 import com.acme.clouddrive.user.User;
 import com.acme.clouddrive.user.UserRepository;
 import org.springframework.beans.factory.annotation.Value;
@@ -25,6 +27,9 @@ public class FileService {
     private final FileObjectRepository files;
     private final UserRepository users;
 
+        private final FileVersionRepository fileVersions;
+
+
     // --- S3 wiring ---
     private final S3Client s3;
     private final String bucket;
@@ -32,11 +37,13 @@ public class FileService {
     public FileService(FileObjectRepository files,
                        UserRepository users,
                        S3Client s3,
-                       @Value("${app.s3.bucket}") String bucket) {
+                       @Value("${app.s3.bucket}") String bucket,
+                     FileVersionRepository fileVersions) {
         this.files = files;
         this.users = users;
         this.s3 = s3;
         this.bucket = bucket;
+          this.fileVersions = fileVersions;
     }
 
     private Long requireUserIdByEmail(String email) {
@@ -58,8 +65,56 @@ public class FileService {
         f.setMimeType(req.mimeType);
         f.setSizeBytes(req.sizeBytes);
         f.setChecksumSha256(req.checksumSha256);
-        return files.save(f);
+         f.setVersion(1);
+        FileObject saved = files.save(f);
+        fileVersions.save(FileVersion.fromFile(saved, 1));
+        return saved;
     }
+
+        @Transactional
+    public FileObject uploadNewVersion(String email, Long fileId, MultipartFile file) throws IOException {
+        Long ownerId = requireUserIdByEmail(email);
+
+        FileObject existing = files.findByIdAndOwnerId(fileId, ownerId)
+                .orElseThrow(() -> new IllegalArgumentException("file_not_found"));
+
+        String originalName = Objects.requireNonNullElse(file.getOriginalFilename(), existing.getOriginalName());
+
+        // Reuse same folder prefix as existing file
+        String existingKey = existing.getS3Key();
+        int idx = existingKey.lastIndexOf('/');
+        String prefix = (idx > 0) ? existingKey.substring(0, idx) : "uploads/" + ownerId;
+
+        String key = String.format("%s/%s/%s", prefix, UUID.randomUUID(), originalName);
+
+        PutObjectRequest put = PutObjectRequest.builder()
+                .bucket(bucket)
+                .key(key)
+                .contentType(file.getContentType())
+                .build();
+
+        s3.putObject(put, RequestBody.fromBytes(file.getBytes()));
+
+        // Determine next version number
+        int currentCount = fileVersions.countByFileId(existing.getId());
+        int nextVersion = Math.max(currentCount + 1, (existing.getVersion() == null ? 1 : existing.getVersion() + 1));
+
+        // Update FileObject to point to latest version
+        existing.setS3Key(key);
+        existing.setOriginalName(originalName);
+        existing.setMimeType(file.getContentType());
+        existing.setSizeBytes(file.getSize());
+        existing.setVersion(nextVersion);
+
+        FileObject saved = files.save(existing);
+
+        // Record a new FileVersion row
+        fileVersions.save(FileVersion.fromFile(saved, nextVersion));
+
+        return saved;
+    }
+
+
 
     public List<FileObject> list(String email, int page, int size) {
         Long ownerId = requireUserIdByEmail(email);
@@ -107,13 +162,45 @@ public class FileService {
         s3.putObject(put, RequestBody.fromBytes(file.getBytes()));
 
         // Save FileObject row
-        FileObject f = new FileObject();
+         FileObject f = new FileObject();
         f.setOwnerId(ownerId);
         f.setS3Key(key);
         f.setOriginalName(originalName);
         f.setMimeType(file.getContentType());
         f.setSizeBytes(file.getSize());
-        // checksumSha256 left null for now (optional)
-        return files.save(f);
+        f.setVersion(1);
+
+        FileObject saved = files.save(f);
+        fileVersions.save(FileVersion.fromFile(saved, 1));
+        return saved;
     }
+    public List<FileVersion> listVersions(String email, Long fileId) {
+        Long ownerId = requireUserIdByEmail(email);
+
+        FileObject existing = files.findByIdAndOwnerId(fileId, ownerId)
+                .orElseThrow(() -> new IllegalArgumentException("file_not_found"));
+
+        return fileVersions.findByFileIdOrderByVersionDesc(existing.getId());
+    }
+
+        @Transactional
+    public FileObject restoreVersion(String email, Long fileId, int version) {
+        Long ownerId = requireUserIdByEmail(email);
+
+        FileObject existing = files.findByIdAndOwnerId(fileId, ownerId)
+                .orElseThrow(() -> new IllegalArgumentException("file_not_found"));
+
+        FileVersion v = fileVersions.findByFileIdAndVersion(existing.getId(), version)
+                .orElseThrow(() -> new IllegalArgumentException("file_version_not_found"));
+
+        // Point FileObject back to this version's data
+        existing.setS3Key(v.getS3Key());
+        existing.setMimeType(v.getMimeType());
+        existing.setSizeBytes(v.getSizeBytes());
+        existing.setChecksumSha256(v.getChecksumSha256());
+        existing.setVersion(v.getVersion());
+
+        return files.save(existing);
+    }
+
 }

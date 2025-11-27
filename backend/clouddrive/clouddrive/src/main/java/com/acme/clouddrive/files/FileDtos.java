@@ -28,6 +28,7 @@ public class FileDtos {
         public long sizeBytes;
         public String checksumSha256;
         public Instant createdAt;
+        public Integer version;
 
         public FileResponse(FileObject f) {
             this.id = f.getId();
@@ -37,6 +38,27 @@ public class FileDtos {
             this.sizeBytes = f.getSizeBytes();
             this.checksumSha256 = f.getChecksumSha256();
             this.createdAt = f.getCreatedAt();
+             this.version = f.getVersion();
         }
     }
+        public static class FileVersionResponse {
+        public Long id;
+        public int version;
+        public String s3Key;
+        public String mimeType;
+        public long sizeBytes;
+        public String checksumSha256;
+        public Instant createdAt;
+
+        public FileVersionResponse(FileVersion v) {
+            this.id = v.getId();
+            this.version = v.getVersion();
+            this.s3Key = v.getS3Key();
+            this.mimeType = v.getMimeType();
+            this.sizeBytes = v.getSizeBytes();
+            this.checksumSha256 = v.getChecksumSha256();
+            this.createdAt = v.getCreatedAt();
+        }
+    }
+
 }

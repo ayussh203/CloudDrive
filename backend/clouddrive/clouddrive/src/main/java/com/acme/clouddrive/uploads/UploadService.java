@@ -2,6 +2,10 @@ package com.acme.clouddrive.uploads;
 
 import com.acme.clouddrive.files.FileObject;
 import com.acme.clouddrive.files.FileObjectRepository;
+import com.acme.clouddrive.files.FileVersion;
+import com.acme.clouddrive.files.FileVersionRepository;
+import com.acme.clouddrive.uploads.UploadDtos.PresignRequest;
+import com.acme.clouddrive.uploads.UploadDtos.PresignResponse;
 import com.acme.clouddrive.user.User;
 import com.acme.clouddrive.user.UserRepository;
 import org.springframework.beans.factory.annotation.Value;
@@ -26,15 +30,19 @@ public class UploadService {
     private final String bucket;
     private final UserRepository users;
     private final FileObjectRepository files;
+        private final FileVersionRepository fileVersions;
+
 
     public UploadService(S3Presigner presigner,
                          @Value("${app.s3.bucket}") String bucket,
                          UserRepository users,
-                         FileObjectRepository files) {
+                         FileObjectRepository files,
+                         FileVersionRepository fileVersions) {
         this.presigner = presigner;
         this.bucket = bucket;
         this.users = users;
         this.files = files;
+        this.fileVersions = fileVersions;
     }
 
     private Long userIdByEmail(String email) {
@@ -63,14 +71,17 @@ public class UploadService {
         URL url = presigned.url();
 
         // Create metadata row now (so list shows the item immediately)
-        FileObject f = new FileObject();
+         FileObject f = new FileObject();
         f.setOwnerId(ownerId);
         f.setS3Key(key);
         f.setOriginalName(req.originalName);
         f.setMimeType(req.mimeType);
         f.setSizeBytes(req.sizeBytes);
         f.setChecksumSha256(req.checksumSha256);
-        files.save(f);
+        f.setVersion(1);
+
+        FileObject saved = files.save(f);
+        fileVersions.save(FileVersion.fromFile(saved, 1));
 
         return new PresignResponse(url.toString(), key, req.mimeType);
     }
