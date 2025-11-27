@@ -3,8 +3,8 @@ name: CloudDrive CI
 on:
   push:
     branches:
-      - '**'      # run on every branch
-  pull_request:   # also run on PRs
+      - '**'
+  pull_request:
 
 jobs:
   build-and-test:
@@ -19,9 +19,8 @@ jobs:
         with:
           distribution: 'temurin'
           java-version: '21'
-          cache: 'maven'   # cache ~/.m2 to speed up future runs
+          cache: 'maven'
 
-      - name: Build and run tests with Maven
+      - name: Build and test using Maven
+        working-directory: backend/clouddrive/clouddrive
         run: mvn -B clean verify
-        # -B = batch mode (no prompts)
-        # clean verify = compile + run tests + build JAR
