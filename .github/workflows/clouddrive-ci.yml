@@ -1,0 +1,39 @@
+name: CloudDrive Backend CI
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'backend/clouddrive/clouddrive/**'
+      - '.github/workflows/clouddrive-ci.yml'
+  pull_request:
+    branches:
+      - main
+    paths:
+      - 'backend/clouddrive/clouddrive/**'
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: backend/clouddrive/clouddrive
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '21'
+          cache: 'maven'
+
+      - name: Build (skip tests)
+        run: mvn -q -DskipTests package
+
+      - name: Run tests
+        run: mvn -q test
