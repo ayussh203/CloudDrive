@@ -1,0 +1,27 @@
+name: CloudDrive CI
+
+on:
+  push:
+    branches:
+      - '**'      # run on every branch
+  pull_request:   # also run on PRs
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '21'
+          cache: 'maven'   # cache ~/.m2 to speed up future runs
+
+      - name: Build and run tests with Maven
+        run: mvn -B clean verify
+        # -B = batch mode (no prompts)
+        # clean verify = compile + run tests + build JAR
