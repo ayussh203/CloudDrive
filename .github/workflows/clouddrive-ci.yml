@@ -37,3 +37,10 @@ jobs:
 
       - name: Run tests
         run: mvn -q test
+      
+      - name: Upload built JAR
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: clouddrive-backend-jar
+          path: backend/clouddrive/clouddrive/target/clouddrive-*.jar
