@@ -1,9 +1,5 @@
-[![CloudDrive Backend CI](https://github.com/ayussh203/CloudDrive/actions/workflows/clouddrive-ci.yml/badge.svg)](https://github.com/ayussh203/CloudDrive/actions/workflows/clouddrive-ci.yml)
-
 # 🚀 CloudDrive – Production-Grade File Storage & Sharing Platform  
 **Java • Spring Boot 3 • AWS S3 • Docker • Terraform • GitHub Actions**
-
-[![CloudDrive Backend CI](https://github.com/ayussh203/CloudDrive/actions/workflows/clouddrive-ci.yml/badge.svg)](https://github.com/ayussh203/CloudDrive/actions/workflows/clouddrive-ci.yml)
 
 CloudDrive is a **secure, scalable backend** for storing, managing, and sharing files — built using industry-grade patterns found in enterprise cloud storage systems.
 
