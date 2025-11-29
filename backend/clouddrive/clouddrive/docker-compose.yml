@@ -1,0 +1,43 @@
+
+services:
+  db:
+    image: postgres:16
+    container_name: clouddrive-db
+    environment:
+      POSTGRES_DB: clouddrive
+      POSTGRES_USER: cloudadmin
+      POSTGRES_PASSWORD: CloudDriveP#ss123!
+    ports:
+      - "5432:5432"
+    volumes:
+      - clouddrive_db_data:/var/lib/postgresql/data
+
+  app:
+    build: .
+    container_name: clouddrive-backend
+    depends_on:
+      - db
+    environment:
+      # Spring datasource (overrides application.yml defaults)
+      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/clouddrive
+      SPRING_DATASOURCE_USERNAME: cloudadmin
+      SPRING_DATASOURCE_PASSWORD: CloudDriveP#ss123!
+
+      # Server
+      PORT: 5000
+
+      # JWT + S3 config
+      APP_JWT_SECRET: dev-change-me-please-32+chars-long
+      APP_JWT_TTLMINUTES: 60
+      APP_S3_BUCKET: clouddrive-dev-ayush
+      APP_S3_REGION: ap-south-1
+
+      # (AWS credentials will be picked from host if needed)
+    ports:
+      - "5000:5000"
+    # If you want to reuse local ~/.aws creds inside container:
+    # volumes:
+    #   - ~/.aws:/root/.aws:ro
+
+volumes:
+  clouddrive_db_data:

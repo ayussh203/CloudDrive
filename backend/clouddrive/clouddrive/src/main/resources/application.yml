@@ -4,19 +4,15 @@ server:
 spring:
   application:
     name: clouddrive
-
   datasource:
-    url: ${CLOUDDRIVE_DB_URL:jdbc:postgresql://clouddrive-db-public.czio2aggmdzt.ap-south-1.rds.amazonaws.com:5432/clouddrive}
-    username: ${CLOUDDRIVE_DB_USERNAME:cloudadmin}
-    password: ${CLOUDDRIVE_DB_PASSWORD:CloudDriveP#ss123!}
-
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://clouddrive-db-public.czio2aggmdzt.ap-south-1.rds.amazonaws.com:5432/clouddrive}
+    username: ${SPRING_DATASOURCE_USERNAME:cloudadmin}
+    password: ${SPRING_DATASOURCE_PASSWORD:CloudDriveP#ss123!}
   jpa:
     hibernate:
       ddl-auto: update
     properties:
-      hibernate:
-        format_sql: true
-
+      hibernate.format_sql: true
   h2:
     console:
       enabled: true
@@ -30,9 +26,8 @@ management:
 
 app:
   jwt:
-    secret: ${CLOUDDRIVE_JWT_SECRET:dev-change-me-please-32+chars-long}
-    ttlMinutes: ${CLOUDDRIVE_JWT_TTL_MINUTES:60}
-
+    secret: ${APP_JWT_SECRET:dev-change-me-please-32+chars-long}
+    ttlMinutes: ${APP_JWT_TTLMINUTES:60}
   s3:
-    bucket: ${CLOUDDRIVE_S3_BUCKET:clouddrive-dev-ayush}
-    region: ${CLOUDDRIVE_S3_REGION:ap-south-1}
+    bucket: ${APP_S3_BUCKET:clouddrive-dev-ayush}
+    region: ${APP_S3_REGION:ap-south-1}
